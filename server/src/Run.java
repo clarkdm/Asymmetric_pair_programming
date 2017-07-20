@@ -1,22 +1,30 @@
 import Files.File_Manager;
 import users.Users_Manager;
 
-
+/**
+ * 
+ * @author dmclark
+ *
+ */
 public class Run {
-	
+	/**
+	 * 
+	 * @param argv
+	 * @throws Exception
+	 */
 	
 	public static void main(String argv[]) throws Exception {
 		File_Manager files = new File_Manager();
-		Users_Manager users = new Users_Manager();
+		Users_Manager users = new Users_Manager(files);
 		
 		
-		files.new_file("code.agda");
-		files.new_file("test.html");
-		files.new_file("test2.html");
-		files.new_file("css.css");
-		files.new_file("text_Controller.js");
-		files.new_file("read_only.js");
-		files.new_file("favicon.ico");
+		files.new_file("code.agda", true);
+		files.new_file("test.html", false);
+		files.new_file("test2.html", false);
+		files.new_file("css.css", false);
+		files.new_file("text_Controller.js", false);
+		files.new_file("read_only.js", false);
+		files.new_file("favicon.ico", false);
 		
 		
 

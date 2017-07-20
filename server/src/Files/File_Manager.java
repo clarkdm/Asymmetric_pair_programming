@@ -7,11 +7,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observable;
 
+/**
+ * 
+ * @author dmclark
+ *
+ */
 public class File_Manager extends Observable {
 
 	private ArrayList<Available_File> files = new ArrayList<Available_File>();
 	private ArrayList<String> names = new ArrayList<String>();
 
+	/**
+	 * 
+	 */
 	public File_Manager() {
 
 	}
@@ -34,15 +42,52 @@ public class File_Manager extends Observable {
 		return -1;
 
 	}
+	
+	
+	
+	/**
+	 * take in cursor or character position and fileName and returns the line number
+	 * @param fileName name of the file being accessed
+	 * @param position position cursor position that file
+	 * @return the line number
+	 */
+	public int Get_line_number(String fileName, int position) {
+		
+		
+		return files.get(get_index(fileName)).Get_line_number(position);
+		
+		
+	}
+	public String Get_visible() {
+		String file_names = "";
+		int i = 0;
+		int size = files.size();
+		while ((i < size)) {
+			if (files.get(i).getVisibility()) {
+				if (file_names == "") {
+
+					file_names = files.get(i).Get_file_name();
+
+				} else {
+					file_names = file_names + "," + files.get(i).Get_file_name();
+				}
+
+			}
+
+			i++;
+		}
+		return file_names;
+
+	}
 
 	public int Get_commands_size(String fileName) {
 		return files.get(get_index(fileName)).Get_commands_size();
 
 	}
 
-	public void new_file(String fileName) {
+	public void new_file(String fileName, Boolean visible) {
 
-		Available_File file_ = new Available_File(fileName);
+		Available_File file_ = new Available_File(fileName, visible);
 		// System.out.println("£££££££££££££ " + fileName + "
 		// ££££££££££££"+file_.Get_file_name()+ "££££££££££££ ");
 		files.add(file_);

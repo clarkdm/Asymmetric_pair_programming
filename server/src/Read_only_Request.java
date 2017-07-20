@@ -11,6 +11,11 @@ import java.util.StringTokenizer;
 import Files.File_Manager;
 import users.Users_Manager;
 
+/**
+ * 
+ * @author dmclark
+ *
+ */
 class Read_only_Request implements Runnable, Observer {
 
 	static String CRLF = "\r\n";
@@ -23,6 +28,15 @@ class Read_only_Request implements Runnable, Observer {
 	private static File_Manager files;
 
 	// Constructor
+
+	/**
+	 * 
+	 * @param socket
+	 * @param files2
+	 * @param users
+	 * @throws Exception
+	 */
+
 	public Read_only_Request(Socket socket, File_Manager files2, Users_Manager users) throws Exception {
 
 		this.socket = socket;
@@ -46,6 +60,7 @@ class Read_only_Request implements Runnable, Observer {
 	}
 
 	private void processRequest() throws Exception {
+
 		// Random randomGenerator = new Random();
 		// Thread.sleep(5000 + randomGenerator.nextInt(1000));
 		// Get a reference to the socket's input and output streams.
@@ -116,32 +131,9 @@ class Read_only_Request implements Runnable, Observer {
 
 			}
 
-			char[] charBuffer = new char[128];
-			StringBuilder stringBuilder = new StringBuilder();
+			
 
-			// reads the 14th line which contains the command
-			// E.G. 17///102///
-			br.read(charBuffer, 0, 128);
-			stringBuilder.append(charBuffer);
-			String command = stringBuilder.toString();
-
-			System.out.println("15_15_15_15 " + command + " " + command_type.contains("get_updates"));
-
-			if (command_type.contains("get_updates")) {
-
-				String file_Name = tokens_2.nextToken();
-				get_updates(command, file_Name, os, br);
-
-			} else if (command_type.contains("Get_File")) {
-				System.out.println("Get_File");
-				String file_Name = tokens_2.nextToken();
-				Get_File(command, file_Name, os, br);
-				
-			} else if (command_type.contains("Set_UserName")) {
-				System.out.println("Set_UserName");
-				String file_Name = tokens_2.nextToken();
-				Set_UserName(command, file_Name, os, br);
-			}
+			Command_response(command_type, tokens_2, os, br);
 
 		} else // if (method.equals("GET"))
 		{
@@ -152,15 +144,92 @@ class Read_only_Request implements Runnable, Observer {
 		}
 
 	}
-	
-	
-	private void Set_UserName(String command, String file_Name, DataOutputStream os, BufferedReader br)
-			throws IOException {
+
+	/**
+	 * 
+	 * Takes in the commands type and then runs the command that is requested
+	 * 
+	 * @param charBuffer
+	 *            data that goes along with the command
+	 * @param command_type
+	 *            the type of commands that is being executed
+	 * @param tokens_2
+	 *            contains the filename
+	 * @param os
+	 *            the data outputs stream
+	 * @param br
+	 *            the buffer reader
+	 *
+	 * 
+	 * 
+	 * @throws Exception
+	 */
+	private void Command_response(String command_type, StringTokenizer tokens_2, DataOutputStream os,
+			BufferedReader br) throws Exception {
+		
+		char[] charBuffer = new char[100];
+		// reads the 14th line which contains the command
+		// E.G. 17///102///
+		br.read(charBuffer, 0, 100);
+
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 1; i < charBuffer.length; i++) {
+			char temp = charBuffer[i];
+
+			
+//			'\u0000' == null
+			if (temp != '\u0000') {
+
+				stringBuilder.append(temp);
+			}
+		}	
+		
+		String command_data = stringBuilder.toString();
+		System.out.println("15_15_15_15 " + command_data + " " + command_type.contains("get_updates"));
+		if (command_type.contains("get_updates")) {
+
+			String file_Name = tokens_2.nextToken();
+			get_updates(command_data, file_Name, os, br);
+
+		} else if (command_type.contains("Get_File")) {
+			System.out.println("Get_File");
+			String file_Name = tokens_2.nextToken();
+			Get_File(command_data, file_Name, os, br);
+
+		} else if (command_type.contains("Set_UserName")) {
+			System.out.println("Set_UserName");
+			String file_Name = tokens_2.nextToken();
+			Set_UserName(command_data, file_Name, os, br);
+
+		} else if (command_type.contains("Set_User_Position")) {
+			System.out.println("Set_User_Position");
+			String file_Name = tokens_2.nextToken();
+			Set_User_Position(command_data, file_Name, os, br);
+
+		} else if (command_type.contains("Get_Users_Position")) {
+			System.out.println("Get_Users_Position");
+			String file_Name = tokens_2.nextToken();
+			Get_Users_Position(os, br);
+
+		}
+
+	}
+
+	/**
+	 * 
+	 * gets positional details of all users including start of selection end of
+	 * selection and filename and username and user ID number
+	 * 
+	 * @param os
+	 *            the data outputs stream
+	 * @param br
+	 *            the buffer reader
+	 * 
+	 */
+	private void Get_Users_Position(DataOutputStream os, BufferedReader br) throws IOException {
+
 		String statusLine = "";
 		String contentTypeLine = "";
-
-		String ContentLength = "";
-		
 
 		statusLine = "HTTP/1.1 200 OK";
 		// contentTypeLine = "Content-type: " + contentType(file_Name);
@@ -174,31 +243,117 @@ class Read_only_Request implements Runnable, Observer {
 		// Send the content type line.
 		os.writeBytes(contentTypeLine);
 		os.writeBytes(CRLF + "\n");
-	
-		
-			
-			StringTokenizer command_tokens = new StringTokenizer(command, "///");
-			// skip new line at the start
-			
 
-			command_tokens.nextToken();
-			String UserName = command_tokens.nextToken();
-			
-			
+		os.writeBytes(users.get_Users());
 
-			
-			os.writeBytes(users.add_User(UserName));
-			
-			os.close();
-			br.close();
-			socket.close();
-		
-
+		os.close();
+		br.close();
+		socket.close();
 
 	}
-	
-	
-	
+
+	/**
+	 * 
+	 * processes the command of updating the users cursor position
+	 * 
+	 * @param command_data
+	 *            data that goes along with the command
+	 * @param file_Name
+	 *            the name of the file that the user is currently on
+	 * @param os
+	 *            the data outputs stream
+	 * @param br
+	 *            the buffer reader
+	 * @throws IOException
+	 */
+	private void Set_User_Position(String command_data, String file_Name, DataOutputStream os, BufferedReader br)
+			throws IOException {
+
+		String statusLine = "";
+		String contentTypeLine = "";
+
+		statusLine = "HTTP/1.1 200 OK";
+		// contentTypeLine = "Content-type: " + contentType(file_Name);
+
+		// System.out.println("3");
+
+		// Send the status line.
+
+		os.writeBytes(statusLine);
+		os.writeBytes(CRLF);
+		// Send the content type line.
+		os.writeBytes(contentTypeLine);
+		os.writeBytes(CRLF + "\n");
+
+		StringTokenizer command_tokens = new StringTokenizer(command_data, "///");
+		// skip new line at the start
+
+		command_tokens.nextToken();
+		String ID_S = command_tokens.nextToken();
+		StringTokenizer command_tokens_2 = new StringTokenizer(command_tokens.nextToken(), ",");
+		String cursor_End_Position = command_tokens_2.nextToken();
+		String cursor_Start_Position = command_tokens_2.nextToken();
+		System.out.println(
+				"###########################" + ID_S + "# #" + cursor_End_Position + "# #" + cursor_Start_Position);
+
+		users.set_User_Position(Integer.parseInt(ID_S), Integer.parseInt(cursor_End_Position),
+				Integer.parseInt(cursor_Start_Position), command_tokens.nextToken());
+
+		os.close();
+		br.close();
+		socket.close();
+
+	}
+
+	/**
+	 * 
+	 * processes the command of setting the user's name and sends the user's ID
+	 * back to the user
+	 * 
+	 * @param command_data
+	 *            data that goes along with the command
+	 * @param file_Name
+	 *            the name of the file that the user is currently on
+	 * @param os
+	 *            the data outputs stream
+	 * @param br
+	 *            the buffer reader
+	 * 
+	 */
+	private void Set_UserName(String command, String file_Name, DataOutputStream os, BufferedReader br)
+			throws IOException {
+
+		String statusLine = "";
+		String contentTypeLine = "";
+
+		statusLine = "HTTP/1.1 200 OK";
+		// contentTypeLine = "Content-type: " + contentType(file_Name);
+
+		// System.out.println("3");
+
+		// Send the status line.
+
+		os.writeBytes(statusLine);
+		os.writeBytes(CRLF);
+		// Send the content type line.
+		os.writeBytes(contentTypeLine);
+		os.writeBytes(CRLF + "\n");
+
+		StringTokenizer command_tokens = new StringTokenizer(command, "///");
+		// skip new line at the start
+
+		command_tokens.nextToken();
+		String UserName = command_tokens.nextToken();
+
+		// adds the user to the list of users and returns the user ID number as
+		// a string and then sends that to the client
+		os.writeBytes(users.add_User(UserName));
+
+		os.close();
+		br.close();
+		socket.close();
+
+	}
 
 	private void Get_File(String command, String file_Name, DataOutputStream os, BufferedReader br) throws IOException {
 		String statusLine = "";
@@ -238,6 +393,20 @@ class Read_only_Request implements Runnable, Observer {
 
 	}
 
+	/**
+	 * allow the client to request any updates to the final currently being
+	 * viewed
+	 * 
+	 * @param command
+	 *            data that goes along with the command
+	 * @param file_Name
+	 *            the name of the file that the user is currently on
+	 * @param os
+	 *            the data outputs stream
+	 * @param br
+	 *            the buffer reader
+	 * @throws IOException
+	 */
 	private void get_updates(String command, String file_Name, DataOutputStream os, BufferedReader br)
 			throws IOException {
 		String statusLine = "";
@@ -288,93 +457,6 @@ class Read_only_Request implements Runnable, Observer {
 			socket.close();
 
 		}
-
-		// while (true) {
-		// try {
-		// Thread.sleep(1000);
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// os.writeBytes(files.Get_changed(file_Name, sequence_ID));
-		// sequence_ID = files.Get_largest_sequence_ID(file_Name);
-		//
-		// }
-
-		// Send a blank line to indicate the end of the header lines.
-
-		// System.out.println(files.save_file(file_Name));
-
-	}
-
-	private static void Command_response(StringTokenizer tokens_2, DataOutputStream os, BufferedReader br,
-			Socket socket) throws Exception {
-
-		File fileName = new File(tokens_2.nextToken());
-		// File fileName = new File("ajax.html");
-
-		// Open the requested file.
-		FileInputStream fis = null;
-		boolean fileExists = true;
-		try {
-			fis = new FileInputStream(fileName);
-		} catch (FileNotFoundException e) {
-			fileExists = false;
-		}
-
-		// Construct the response message.
-		String statusLine = "";
-		String contentTypeLine = "";
-		String entityBody = "";
-		String ContentLength = "";
-
-		if (fileExists) {
-			statusLine = "HTTP/1.1 200 OK";
-			contentTypeLine = "Content-type: " + contentType(fileName.toString());
-			ContentLength = "Content-Length:" + fis.available();
-		} else {
-			statusLine = "HTTP/1.1 404";
-			contentTypeLine = " Not Found";
-			entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + fileName
-					+ "<BODY>        Not Found</BODY></HTML>";
-
-		}
-
-		// Send the entity body.
-		if (fileExists) {
-
-			// Send the status line.
-			os.writeBytes(statusLine);
-			os.writeBytes(CRLF);
-			// Send the content type line.
-			os.writeBytes(contentTypeLine);
-			os.writeBytes(CRLF);
-
-			os.writeBytes(ContentLength);
-
-			os.writeBytes(CRLF + "\n");
-			sendBytes(fis, os);
-			// Send a blank line to indicate the end of header lines.
-			fis.close();
-			os.writeBytes(CRLF);
-		} else {
-			// Send the status line.
-
-			os.writeBytes(statusLine);
-			os.writeBytes(CRLF);
-			// Send the content type line.
-			os.writeBytes(contentTypeLine);
-			os.writeBytes(CRLF + "\n");
-			os.writeBytes(entityBody);
-			// Send a blank line to indicate the end of the header lines.
-
-		}
-		// System.out.println("############# " + statusLine + contentTypeLine +
-		// " ##########");
-		// Close streams and socket.
-		os.close();
-		br.close();
-		socket.close();
 
 	}
 

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Page</title>
+    <meta charset="UTF-8">
+    
+       <meta name="viewport" content="width=600px, ser-scalable=no">
+     
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" type="text/css" href="css.css" /> </head>
+
+<body>
+    <script>
+        var r = 1;
+        var l = 1;
+
+        function dropdown_right() {
+            if (r == 0) {
+                document.getElementById("dropdown_right").style.display = "none";
+                r = 1;
+            } else {
+                document.getElementById("dropdown_right").style.display = "block";
+                r = 0;
+            }
+        }
+
+        function dropdown_left() {
+            if (l == 0) {
+                document.getElementById("dropdown_left").style.display = "none";
+                l = 1;
+            } else {
+                document.getElementById("dropdown_left").style.display = "block";
+                l = 0;
+            }
+        }
+
+    </script>
+    <main id="main">
+        <ul id="topdiv">
+            <div id="left" class="dropdown" style="float:left;">
+                <button class="dropbtn">Opne file</button>
+                <div id="dropdown_left" class="dropdown-content_left" style="left:0;">
+                    <div id="file">test</div>
+                </div>
+            </div>
+            <div id="right" class="dropdown" style="float:right;">
+                <button class="dropbtn" onclick="dropdown_right()">Users</button>
+                <div id="dropdown_right" class="dropdown-content_right">
+                    <div id="Users"></div>
+                </div>
+            </div>
+
+
+
+            <div id="Users_n" class="Users_name" style="float:right;">
+            
+            </div>
+
+            
+        </ul>
+        <div id="textdiv">
+            <div id="file_name">test.c</div> <pre id="text" contenteditable="true">
+                1
+            </pre >
+
+        </div>
+
+    </main>
+
+
+
+<script src="readwrite.js"></script>
+</body>
+</html>

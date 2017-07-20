@@ -1,11 +1,153 @@
 /*jslint node: true, browser: true */
 "use strict";
+get_username()
 Get_File()
 
 var file_s = "";
 var sequence_ID = 0;
+var user_ID = 0;
+var username;
+var filename = "code.agda"
+
+var user_ID
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+function Get_Users_Position() {
+ 
+
+ var xmlhttp,
+        xmlDoc,
+        response;
+   
+        xmlhttp = new XMLHttpRequest();
+   
+
+    xmlhttp.open("POST", "http://127.0.0.1:6789/code.agda", true);
+    xmlhttp.setRequestHeader("command", "Get_Users_Position")
+    xmlhttp.send();
+
+
+    xmlhttp.onreadystatechange = function () {
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+
+            response = xmlhttp.responseText;
+
+            
+            console.log("users_position " + response);
+
+            }
+         
+        } 
+
+};
+
+function Send_User_Position(person) {
+   
+
+ var xmlhttp,
+        xmlDoc,
+        response;
+   
+        xmlhttp = new XMLHttpRequest();
+   
+
+    xmlhttp.open("POST", "http://127.0.0.1:6789/code.agda", true);
+    xmlhttp.setRequestHeader("command", "Set_User_Position")
+    xmlhttp.send("///" + parseInt(user_ID) + "///" + person + "///" + filename);
+
+
+    xmlhttp.onreadystatechange = function () {
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+
+            response = xmlhttp.responseText;
+
+            
+            // console.log("user_ID" + parseInt(user_ID));
+
+            }
+         
+        } 
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function get_username() {
+    var username_t = prompt("Please enter your username", "Harry_Potter");
+    
+    while (username_t == "") {
+        username_t = prompt("Please enter your username", "Harry_Potter");
+    }
+
+
+ var xmlhttp,
+        xmlDoc,
+        response;
+
+
+
+
+   
+        xmlhttp = new XMLHttpRequest();
+   
+
+    xmlhttp.open("POST", "http://127.0.0.1:6789/code.agda", true);
+    xmlhttp.setRequestHeader("command", "Set_UserName")
+    xmlhttp.send("///"+username_t+"///");
+
+
+    xmlhttp.onreadystatechange = function () {
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+
+            user_ID = xmlhttp.responseText;
+            username = username_t;
+            
+            console.log("user_ID" + parseInt(user_ID));
+
+
+            
+
+
+
+            }
+          
+
+        } 
+
+
+};
 
 function Get_File() {
 
@@ -36,7 +178,7 @@ function Get_File() {
 
             var temp = response.split("///");
             sequence_ID = parseInt(temp[0]) ;
-            console.log("///hi " + sequence_ID);
+            console.log("sequence_ID - " + sequence_ID);
 
 
             file_s = response.replace((temp[0] + "///"), "");
@@ -66,20 +208,19 @@ var w3 = (typeof window.getSelection != "undefined") && true;
 
 
 function getCaretPosition(element) {
-    var caretOffset = 0;
-    if (w3) {
+    var caretOffset;
+    
         var range = window.getSelection().getRangeAt(0);
         var preCaretRange = range.cloneRange();
         preCaretRange.selectNodeContents(element);
         preCaretRange.setEnd(range.endContainer, range.endOffset);
-        caretOffset = preCaretRange.toString().length;
-    } else if (ie) {
-        var textRange = document.selection.createRange();
-        var preCaretTextRange = document.body.createTextRange();
-        preCaretTextRange.moveToElementText(element);
-        preCaretTextRange.setEndPoint("EndToEnd", textRange);
-        caretOffset = preCaretTextRange.text.length;
-    }
+        caretOffset = [(preCaretRange.toString().length), ((preCaretRange.toString().length) - range.toString().length) ]
+           console.log(caretOffset);
+
+// send cursor position to the server
+        Send_User_Position(caretOffset);
+        
+        Get_Users_Position();
     return caretOffset;
 }
 
@@ -156,6 +297,7 @@ function getSelectedRange(element) {
 }
 
 function keypress_showCaretDiv(event) {
+    sequence_ID = sequence_ID + 1;
     var el = $("#test").get(0);
     var x = event.keyCode;               // Get the Unicode value
     var y = String.fromCharCode(x);      // Convert the value into a character
@@ -198,7 +340,8 @@ function keypress_showCaretDiv(event) {
             
             
 			
-			console.log("200 console.log(xhttp.responseText);" + sequence_ID);
+			console.log("200 console.log(xhttp.responseText);");
+            console.log("sequence_ID - " + sequence_ID);
 			//console.log(xmlhttp.responseText);
     		//text1 = document.getElementById("text1")
 			//text1.value = xmlhttp.responseText

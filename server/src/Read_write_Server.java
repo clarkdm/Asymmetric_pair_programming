@@ -5,13 +5,25 @@ import java.util.*;
 import Files.File_Manager;
 import users.Users_Manager;
 
-
+/**
+ * 
+ * @author dmclark
+ *
+ */
 public final class Read_write_Server implements Runnable {
 	private ServerSocket sock;
 	private Socket client;
 	private File_Manager files;
 	private Users_Manager users;
 
+	
+	/**
+	 * 
+	 * @param port
+	 * @param files
+	 * @param users
+	 * @throws Exception
+	 */
 	public Read_write_Server(int port, File_Manager files, Users_Manager users) throws Exception {
 //		 Establish the listen socket.
 		sock = new ServerSocket(port);
